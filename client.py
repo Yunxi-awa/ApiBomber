@@ -1,17 +1,22 @@
 import socket
 import sys
 
-def send_command(command: str):
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.connect(('localhost', 9999))
-        s.sendall(command.encode('utf-8'))
-        response = s.recv(1024)
-        print('Received from server:', response.decode('utf-8'))
+class Client:
+    def __init__(self, server_address: str, port: int):
+        self.server_address = server_address
+        self.port = port
+
+    def send_command(self, command: str):
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
+            client_socket.connect((self.server_address, self.port))
+            client_socket.sendall(command.encode('utf-8'))
+            response = client_socket.recv(4096)
+            print(f"Response from {self.server_address}:{self.port} - {response.decode('utf-8')}")
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Usage: python client.py <command>")
+    if len(sys.argv) < 4:
+        print("Usage: python client.py <server_address> <port> <command>")
         sys.exit(1)
 
-    command = " ".join(sys.argv[1:])
-    send_command(command)
+    client = Client(sys.argv[1], int(sys.argv[2]))
+    client.send_command(' '.join(sys.argv[3:]))
