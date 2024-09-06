@@ -1,4 +1,9 @@
-     # 高并发 API 轰炸服务与客户端
+<div align="center">
+<h1>API 轰炸机</h1>
+[English](README.md) | [简体中文](README.zh_CN.md)
+</div>
+
+# 高并发 API 轰炸服务与客户端
 该项目是一个异步 API 服务器。服务器使用 Python 的`asyncio`和`multiprocessing`模块并发处理多个 API 请求。
 
 ## 特性
