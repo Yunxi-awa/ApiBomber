@@ -1,17 +1,17 @@
 <div align="center">
-<h1>API Bomber</h1>
+
+# API Bomber
 
 [English](README.md) | [简体中文](README.zh_CN.md)
+
+This project is an asynchronous API server
+that uses Python's asyncio and multiprocessing modules
+to handle multiple API requests concurrently.
 
 </div>
 
 
 
-# High-Concurrency API Bombing Service and Client
-
-This project is an asynchronous API server
-that uses Python's asyncio and multiprocessing modules
-to handle multiple API requests concurrently.
 
 ## Features
 
