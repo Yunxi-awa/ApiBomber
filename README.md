@@ -1,6 +1,10 @@
 <div align="center">
 
-# API Bomber
+<h1>
+<span style="color: red;">This README is no longer available for newer versions, please wait for an update.</span>
+</h1>
+
+# Api Bomber
 
 [English](README.md) | [简体中文](README.zh_CN.md)
 

@@ -1,5 +1,10 @@
 <div align="center">
 
+<h1>
+<span style="color: red;">此README已不再适用于新版本, 请等待更新</span>
+</h1>
+
+
 # API 轰炸机
 
 [English](README.md) | [简体中文](README.zh_CN.md)
