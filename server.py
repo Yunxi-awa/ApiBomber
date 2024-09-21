@@ -207,7 +207,7 @@ if __name__ == "__main__":
     def exitCallback():
         logger.info("服务端已终止运行。")
 
-    logger.add("server.log", retention="3 days", backtrace=True, diagnose=True, level=40)
+    logger.add("server.log", rotation="64 MB", backtrace=True, diagnose=True, level="DEBUG")
 
     s = AsyncServer()
     api = ApiManager()

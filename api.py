@@ -1,14 +1,14 @@
 import time
 from asyncio import CancelledError
-from collections.abc import MutableMapping, MutableSequence
+from collections.abc import MutableMapping, MutableSequence, Hashable, Sequence, Set
 from functools import lru_cache
+
 from typing import Any
 
-
+import orjson
 from curl_cffi.requests import Headers, AsyncSession, RequestsError
 
 supportiveMethod = ["get", "post", "put", "delete", "patch", "head", "options"]
-
 
 
 class Api:
@@ -48,7 +48,7 @@ class Api:
                     else:
                         raise RequestsError(f"任务 “{self.desc}” 失败，状态码：{res.status_code}。详细信息：{res.text}")
                 except RequestsError as e:
-                    raise RequestsError(f"任务 “{self.desc}” 失败。")
+                    raise RequestsError(f"任务 “{self.desc}” 失败。详细信息：{e}。")
                 except CancelledError as e:
                     raise CancelledError(f"任务 “{self.desc}” 已取消。")
 
@@ -96,7 +96,7 @@ class Request:
                     }
                 ),
                 "headers": self._deeplyReplaceMap(
-                    self.headers, {
+                    dict(self.headers), {
                         "PHONE": 13633714310,
                         "TIME_STAMP_S": int(time.time()),
                         "TIME_STAMP_MS": int(time.time() * 1000),
@@ -122,7 +122,7 @@ class Request:
                     }
                 ),
                 "headers": self._deeplyReplaceMap(
-                    self.headers, {
+                    dict(self.headers), {
                         "PHONE": 13633714310,
                         "TIME_STAMP_S": int(time.time()),
                         "TIME_STAMP_MS": int(time.time() * 1000),
@@ -137,8 +137,13 @@ class Request:
                 )
             }
 
-    @lru_cache(maxsize=128, typed=True)
-    def _deeplyReplace(self, data: any, old: str, new: Any):
+    def _deeplyReplaceMap(self, data: Any, infoMap: dict):
+        for k, v in infoMap.items():
+            data = self._deeplyReplace(data, k, v)
+        return data
+
+    @staticmethod
+    def _deeplyReplace(data: any, old: str, new: Any):
         """
         对于继承自 MutableMapping 和 MutableSequence 的对象,
         其包含的字符串都会被识别并替换,
@@ -149,45 +154,48 @@ class Request:
         :param new: 替换字符串
         :return: 替换后的数据
         """
-        stack = [data]
+        # stack = [data]
+        #
+        # while stack:
+        #     current = stack.pop()
+        #
+        #     if isinstance(current, MutableMapping):  # 如果是字典
+        #         for key, value in current.items():
+        #             if isinstance(value, (MutableMapping, MutableSequence)):
+        #                 stack.append(value)  # 继续处理嵌套的字典或列表
+        #             elif isinstance(value, str):
+        #                 if f"$STR[{old}]$" in value:
+        #                     current[key] = value.replace(old, str(new))
+        #                 elif f"$INT[{old}]$" == value:
+        #                     current[key] = int(new)
+        #                 elif f"$BOOL[{old}]$" == value:
+        #                     current[key] = bool(new)
+        #                 elif f"$FLOAT[{old}]$" == value:
+        #                     current[key] = float(new)
+        #
+        #     elif isinstance(current, MutableSequence):  # 如果是列表
+        #         for index, item in enumerate(current):
+        #             if isinstance(item, (MutableMapping, MutableSequence)):
+        #                 stack.append(item)  # 继续处理嵌套的字典或列表
+        #             elif isinstance(item, str):
+        #                 if f"$STR[{old}]$" in item:
+        #                     current[index] = item.replace(old, str(new))
+        #                 elif f"$INT[{old}]$" == item:
+        #                     current[index] = int(new)
+        #                 elif f"$BOOL[{old}]$" == item:
+        #                     current[index] = bool(new)
+        #                 elif f"$FLOAT[{old}]$" == item:
+        #                     current[index] = float(new)
 
-        while stack:
-            current = stack.pop()
-
-            if isinstance(current, MutableMapping):  # 如果是字典
-                for key, value in current.items():
-                    if isinstance(value, (MutableMapping, MutableSequence)):
-                        stack.append(value)  # 继续处理嵌套的字典或列表
-                    elif isinstance(value, str):
-                        if f"$STR[{old}]$" in value:
-                            current[key] = value.replace(old, str(new))
-                        elif f"$INT[{old}]$" == value:
-                            current[key] = int(new)
-                        elif f"$BOOL[{old}]$" == value:
-                            current[key] = bool(new)
-                        elif f"$FLOAT[{old}]$" == value:
-                            current[key] = float(new)
-
-            elif isinstance(current, MutableSequence):  # 如果是列表
-                for index, item in enumerate(current):
-                    if isinstance(item, (MutableMapping, MutableSequence)):
-                        stack.append(item)  # 继续处理嵌套的字典或列表
-                    elif isinstance(item, str):
-                        if f"$STR[{old}]$" in item:
-                            current[index] = item.replace(old, str(new))
-                        elif f"$INT[{old}]$" == item:
-                            current[index] = int(new)
-                        elif f"$BOOL[{old}]$" == item:
-                            current[index] = bool(new)
-                        elif f"$FLOAT[{old}]$" == item:
-                            current[index] = float(new)
-
-        return data
-
-    def _deeplyReplaceMap(self, data, infoMap):
-        for k, v in infoMap.items():
-            data = self._deeplyReplace(data, k, v)
-        return data
+        stringify: str = orjson.dumps(data).decode()
+        stringify = (
+            stringify.
+            replace(f"$STR[{old}]$", str(new)).
+            replace(f"\"$INT[{old}]$\"", str(new)).
+            replace(f"\"$BOOL[{old}]$\"", str(new)).
+            replace(f"\"$FLOAT[{old}]$\"", str(new))
+        )
+        return orjson.loads(stringify)
 
     def __eq__(self, other):
         return (

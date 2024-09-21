@@ -245,7 +245,7 @@ class Scheduler:
                 name=k,
                 func=v.request,
                 trigger="interval",
-                triggerKwargs={"seconds": v.interval, "jitter": 2}
+                triggerKwargs={"seconds": v.interval, "jitter": 5}
             )
             self.addTask(task)
         logger.info("已加载所有API任务。")
