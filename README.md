@@ -1,80 +1,94 @@
 <div align="center">
 
-<h1>
-<span style="color: red;">This README is no longer available for newer versions, please wait for an update.</span>
-</h1>
+[//]: # (<h1>)
 
-# Api Bomber
+[//]: # (<span style="color: red;">此README已不再适用于新版本, 请等待更新</span>)
+
+[//]: # (</h1>)
+
+# API 轰炸机
 
 [English](README.md) | [简体中文](README.zh_CN.md)
 
-This project is an asynchronous API server
-that uses Python's asyncio and multiprocessing modules
-to handle multiple API requests concurrently.
+该项目是一个异步 API 轰炸服务器。  
+服务器使用`Apscheduler`和`asyncio`模块并发处理多个 API 请求。
 
 </div>
 
+## 特性
 
+- [X] **高并发**: 超高效率的轰炸！
+- [X] **动态配置**: 支持在服务器运行时或轰炸时动态更改服务器配置（如端口、进程数、单进程并发限制、代理）。配置将会在服务器关闭时自动保存到
+  `config.json`。
+- [X] **代理**
+- [X] **客户端指令**
+- [X] **自动指令**
 
+- [ ] **代理池**
 
-## Features
+## 开始使用
 
-- [X] **High Concurrency**: Ultra-efficient API bombing!
-- [X] **Dynamic Configuration**: Supports dynamic server configuration changes
-  (e.g., port, number of processes, concurrency limits per process, proxy) during runtime or bombing.
-  Changes are automatically saved to config.json when the server shuts down.
-- [X] **Proxy Support**
-- [X] **Client Commands**
+### 先决条件
 
-
-- [ ] **Proxy Pool**
-- [ ] **Automated Commands**
-
-## Getting Started
-
-### Prerequisites
-
-Ensure the following runtime environment and libraries are available on your system:
+确保在您的系统中包含以下运行环境和支持库:
 
 - Python 3.9+
 
-Install dependencies:
+安装依赖库:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### Configuring the Server
+### 配置服务端
 
-Create a `config.json` file in the same directory as `server.py`.  
-Below is a sample configuration:
+在`asset`目录中可见`ServerConfig.json`文件。   
+以下是一个示例配置：
 
-```json
+```json5
 {
-  "port": 12345,
-  "coroutines_per_process": 5,
-  "num_processes": 3,
-  "proxy": "http://127.0.0.1:8080"
+  "socket": {
+    "host": "localhost",
+    "port": 5914
+  },
+  "request": {
+    "timeout": 3000,
+    "retryTimes": 3,
+    "retryInterval": 10000,
+    "retryIntervalJitter": 5000,
+    "maxRedirects": 3,
+    "impersonate": "chrome"
+  },
+  "scheduler": {
+    "workers": 8,
+    "intervalJitter": 500
+  },
+  "log": {
+    "level": "INFO",
+    "path": "./log/server.log",
+    "rotation": "64 MB",
+    "compression": "lzma"
+  },
+  "runtime": {
+    "phones": []
+  }
 }
 ```
 
-### Deploying the Server
+### 部署服务端
 
-#### Starting the Server
+#### 启动服务器
 
-Run `server.py` to start the server.
-> [!WARNING]
-> The server is not immediately available now.
+运行`server.py`即可启动服务端，不过这时还不能使用:
 
 ```bash
 python server.py
 ```
 
-#### Load API
+#### 配置 API 信息
 
-The server expects API configurations to be dynamically loaded using client commands.
-Use the client to load API configurations from a `.json` file.  
-Example of an API configuration file:
+服务器希望通过客户端命令动态加载 API 配置。使用客户端从`.json`文件加载 API。  
+API 配置文件示例：
 
 ```json
 [
@@ -97,36 +111,43 @@ Example of an API configuration file:
 ]
 ```
 
-### Client
+### 使用客户端
 
-Use `client.py` to send commands to the server. Supported commands include:
+使用`client.py`向服务器发送命令。命令分为三部分:
 
-* LOAD: Load API information from a `.json` file.
-    ```bash
-    python client.py 127.0.0.1 12345 LOAD api_config.json
-    ```
-* START: Start bombing APIs.
-    ```bash
-    python client.py 127.0.0.1 12345 START
-    ```
-* STOP: Stop bombing.
-    ```bash
-    python client.py 127.0.0.1 12345 STOP
-    ```
-* SET: Dynamically adjust server configuration.
-    ```bash
-    python client.py 127.0.0.1 12345 SET port 8080
-    ```
+```bash
+<实例> <方法> <参数1> <参数2> ...
+```
 
-## Notes
+默认情况下，可以访问的实例有
 
-* Any configuration changes made during runtime will be saved to `config.json` when the server shuts down.
-* If you change critical settings such as the port, make sure to update the client to use the new port.
+1. #### `server`
+    * `start`：启动服务器
+    * `stop`：停止服务器
+2. #### `bombing`
+    * `load`：加载轰炸任务
+    * `start`：启动轰炸
+    * `pause`：暂停轰炸
+    * `resume`：恢复轰炸
+    * `stop`：停止轰炸
+3. #### `api`
+    * `load`：加载 API 信息
+4. #### `config`
+    * `load`：加载配置
+    * `save`：保存配置
 
-## Acknowledgements
+> [!TIP]
+> 所有的实例都默认继承自CommandSupport，所以都支持get和set方法获取实例的成员变量
 
-To be added.
+## 注意事项
 
-## License
+* 服务器将在关机时把运行时所作的任何配置更改保存到`config.json`。
+* 如果更改了端口等关键设置，确保在使用客户端时更改端口号。
 
-This project is open-source under the MIT License.
+## 特别感谢
+
+暂待补充
+
+## 开源许可
+
+该项目开源，采用 MIT 许可。

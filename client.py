@@ -2,7 +2,7 @@ import asyncio
 
 
 class AsyncClient:
-    def __init__(self, host="localhost", port=8888):
+    def __init__(self, host="localhost", port=5914):
         self.host = host
         self.port = port
         self.reader = None
@@ -22,7 +22,6 @@ class AsyncClient:
                     "\n其它一般性网络问题和错误配置"
                 )
             raise ConnectionRefusedError(e.strerror)
-
 
 
     async def sendCommand(self, command):

@@ -1,6 +1,0 @@
-{
-  "port": 9999,
-  "coroutines_per_process": 5,
-  "num_processes": 3,
-  "proxy": null
-}

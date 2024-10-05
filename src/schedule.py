@@ -13,8 +13,6 @@ from apscheduler.events import EVENT_JOB_MAX_INSTANCES
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from loguru import logger
 
-from api import Api
-
 
 class WorkerCmd(StrEnum):
     ADD = "add"
@@ -124,7 +122,7 @@ class Worker(Process):
                 else:
                     logger.warning(f"“进程-{self.wid}” 接收到了未知的指令 “{cmd.command}”。")
 
-        logger.add("server.log", backtrace=True, diagnose=True, enqueue=True)
+        logger.add("../log/server.log", backtrace=True, diagnose=True, enqueue=True)
         atexit.register(self._exitCallback)
         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
         asyncio.run(async_work())
@@ -239,17 +237,6 @@ class Scheduler:
         for w in self.workers:
             w.queue.put(WorkerCommand(command=command, taskName=None))
 
-    def _load(self, apis: dict[str, "Api"]):
-        for k, v in apis.items():
-            task = Task(
-                name=k,
-                func=v.request,
-                trigger="interval",
-                triggerKwargs={"seconds": v.interval, "jitter": 5}
-            )
-            self.addTask(task)
-        logger.info("已加载所有API任务。")
-
     def start(self):
         for w in self.workers:
             if w.is_alive():
@@ -288,7 +275,7 @@ async def example_task(name):
     print(f"“任务-{name}” 运行完毕。")
 
 
-async def main():
+async def test():
     s = Scheduler(2)
 
     for i in range(10):
@@ -312,6 +299,4 @@ if __name__ == '__main__':
     logging.basicConfig(handlers=[InterceptHandler()], level=0, force=True)
     # 将 APScheduler 的日志器配置为输出到 loguru
     logging.getLogger('apscheduler').setLevel(logging.CRITICAL)
-
-    asyncio.run(main())
 

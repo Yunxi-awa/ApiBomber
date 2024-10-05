@@ -1,0 +1,27 @@
+{
+  "socket": {
+    "host": "localhost",
+    "port": 5914
+  },
+  "request": {
+    "timeout": 3000,
+    "retryTimes": 3,
+    "retryInterval": 10000,
+    "retryIntervalJitter": 5000,
+    "maxRedirects": 3,
+    "impersonate": "chrome"
+  },
+  "scheduler": {
+    "workers": 8,
+    "intervalJitter": 500
+  },
+  "log": {
+    "level": "INFO",
+    "path": "./log/server.log",
+    "rotation": "64 MB",
+    "compression": "lzma"
+  },
+  "runtime": {
+    "phones": []
+  }
+}
